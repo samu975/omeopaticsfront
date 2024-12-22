@@ -1,16 +1,23 @@
 import Formula from '@/app/interfaces/Formula.interface'
 import Medicamento from '@/app/interfaces/Medicamento.interface'
+import FormularioCreacion from '@/components/FormularioCreacion'
 import useFormulaStore from '@/store/formulaStore'
 import useUIStore from '@/store/uiStore'
 import { error } from 'console'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 const ModalAddFormula = () => {
   const { isModalOpen, setIsModalOpen } = useUIStore()
   const { formula, setFormula } = useFormulaStore()
 
+  const [addFollowUp, setAddFollowUp] = useState(false);
+
   const handleCloseModal = () => {
     setIsModalOpen(false)
+  }
+
+  const handleAddFollowUp = () => {
+    setAddFollowUp(true);
   }
 
   const [errors, setErrors] = useState({
@@ -28,6 +35,12 @@ const ModalAddFormula = () => {
   })
 
   const [medicamentoList, setMedicamentoList] = useState<Medicamento[]>([])
+
+  const [formulaId, setFormulaId] = useState(0);
+
+  const generateId = () => {
+    return Math.floor(Math.random() * 1000000);
+  }
 
   const handleChangeFormulaName = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormula({ ...formula, name: e.target.value })
@@ -73,7 +86,7 @@ const ModalAddFormula = () => {
       return
     }
 
-    setFormula({ ...formula, medicines: [...formula.medicines, ...medicamentoList] })
+    setFormula({ ...formula, medicines: [...formula.medicines, ...medicamentoList], id: formulaId })
     setIsModalOpen(false)
   }
 
@@ -101,6 +114,10 @@ const ModalAddFormula = () => {
       return <p className='text-red-500'>Debe agregar al menos un medicamento</p>
     }
   }
+
+  useEffect(() => {
+    setFormulaId(generateId());
+  }, [])
 
   const medicamentoForm = () => (
     <>
@@ -196,6 +213,16 @@ const ModalAddFormula = () => {
                 Agregar Medicamento
               </button>
             </div>
+
+            <div className='flex flex-col gap-4 mt-6'>
+              <button className='btn btn-success' onClick={handleAddFollowUp}>Agregar Formulario de seguimiento</button>
+            </div>
+
+            {addFollowUp && (
+              <div className='flex flex-col gap-4 mt-6'>
+                <FormularioCreacion formulaId={formulaId} />
+              </div>
+            )}
 
             {errors.name && nameError()}
             {(errors.formulaName || errors.medicamentos) && formulaError()}
