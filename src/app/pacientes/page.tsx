@@ -1,69 +1,24 @@
 "use client"
 import useAdminStore from '@/store/adminStore'
-import useUserStore from '@/store/userStore'
 import { useRouter } from 'next/navigation'
-import React, { use, useEffect, useState } from 'react'
-import Paciente from '../interfaces/Paciente.interface'
-
-const mockedPacientes: Paciente[] = [
-  {
-    id: 1,
-    nombre: 'Samuel Rosero',
-    telefono: '3233112502',
-    asignedFormulas: [
-      {
-        id: 1,
-        name: 'Formula 1',
-        description: 'Formula 1',
-        medicines: [
-          {
-            id: 1,
-            name: 'Medicamento 1',
-            description: 'Medicamento 1',
-            dosis: '100mg',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 2,
-    nombre: 'Christian Carrera',
-    telefono: '3202154304',
-    asignedFormulas: [
-      {
-        id: 2,
-        name: 'Formula 2',
-        description: 'Formula 2',
-        medicines: [
-          {
-            id: 2,
-            name: 'Medicamento 2',
-            description: 'Medicamento 2',
-            dosis: '200mg',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 3,
-    nombre: 'Christian Consultorio',
-    telefono: '3003105263',
-    asignedFormulas: [],
-  },
-]
+import React, { useCallback, useEffect } from 'react'
 
 const page = () => {
   const router = useRouter()
   
-  const titles = ['Nombre', 'Teléfono', 'Acciones']
+  const titles = ['Nombre', 'Teléfono', 'Formularios asignados', 'Acciones']
 
   const { pacientes, setPacientes } = useAdminStore()
 
-  useEffect(() => {
-    setPacientes(mockedPacientes)
+  const fecthPacientes = useCallback(async () => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/patients`)
+    const data = await response.json()
+    setPacientes(data)
   }, [])
+
+  useEffect(() => {
+    fecthPacientes()
+  }, [fecthPacientes])
 
   const handleViewPaciente = (id: number) => {
     router.push(`/pacientes/${id}/verPaciente`)
@@ -92,8 +47,9 @@ const page = () => {
         <tbody>
             {pacientes.map((paciente) => (
               <tr key={paciente.id}>
-                <td>{paciente.nombre}</td>
-                <td>{paciente.telefono}</td>
+                <td>{paciente.name}</td>
+                <td>{paciente.phone}</td>
+                <td>{paciente.asignedFormulas.length}</td>
                 {actions(paciente.id)}
               </tr>
             ))}

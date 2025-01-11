@@ -10,7 +10,8 @@ const useFormulaStore = create<FormulaState>((set) => ({
   formula: {
     name: '',
     description: '',
-    medicines: []
+    medicines: [],
+    followUps: []
   },
   setFormula: (formula: Formula) => set({ formula })
 }))

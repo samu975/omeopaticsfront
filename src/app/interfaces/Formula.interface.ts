@@ -1,10 +1,9 @@
-import Medicamento from "./Medicamento.interface"
+import FollowUp from "./FollowUp.interface"
 
 interface Formula {
-  id?: number
   name: string
   description: string
-  medicines: Medicamento[]
+  followUps: FollowUp[]
 }
 
 export default Formula
