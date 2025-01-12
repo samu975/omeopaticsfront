@@ -1,9 +1,11 @@
-import Question from "./Question.interface"
+import Question from './Question.interface'
 
 interface Answer {
-  question: Question
-  type: "abierta" | "multiple" | "unica"
-  answer: string | string[]
+  id?: string;
+  question: Question;
+  type: 'abierta' | 'multiple' | 'unica';
+  answer: string[];
+  createdAt?: Date;
 }
 
-export default Answer
+export default Answer;

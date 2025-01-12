@@ -1,9 +1,14 @@
-import FollowUp from "./FollowUp.interface"
+import Answer from './Answer.interface';
+import Question from './Question.interface';
 
 interface Formula {
-  name: string
-  description: string
-  followUps: FollowUp[]
+  _id?: string;
+  name: string;
+  description: string;
+  questions: Question[];
+  answers?: Answer[];
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-export default Formula
+export default Formula;

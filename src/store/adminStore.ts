@@ -1,20 +1,28 @@
+import Formula from "@/app/interfaces/Formula.interface"
 import User from "@/app/interfaces/User.interface"
 import { create } from "zustand"
 
+type Paciente = User & {
+  _id: string
+  asignedFormulas: Formula[]
+}
+
 interface AdminState {
-  pacientes: User[]
-  setPacientes: (pacientes: User[]) => void
-  addPaciente: (paciente: User) => void
+  pacientes: Paciente[]
+  setPacientes: (pacientes: Paciente[]) => void
+  addPaciente: (paciente: Paciente) => void
   deletePaciente: (id: number) => void
-  updatePaciente: (paciente: User) => void
+  updatePaciente: (paciente: Paciente) => void
 }
 
 const useAdminStore = create<AdminState>((set) => ({
   pacientes: [],
-  setPacientes: (pacientes: User[]) => set({ pacientes }),
-  addPaciente: (paciente: User) => set((state) => ({ pacientes: [...state.pacientes, paciente] })),
+  setPacientes: (pacientes: Paciente[]) => set({ pacientes }),
+  addPaciente: (paciente: Paciente) => set((state) => ({ pacientes: [...state.pacientes, paciente] })),
   deletePaciente: (id: number) => set((state) => ({ pacientes: state.pacientes.filter((paciente) => paciente.id !== id) })),
-  updatePaciente: (paciente: User) => set((state) => ({ pacientes: state.pacientes.map((p) => p.id === paciente.id ? paciente : p) })),
+  updatePaciente: (paciente: Paciente) => set((state) => ({ pacientes: state.pacientes.map((p) => p._id === paciente._id ? paciente : p) })),
+  addFormulaToPaciente: (pacienteId: string, formula: Formula) => set((state) => ({ pacientes: state.pacientes.map((p) => p._id === pacienteId ? { ...p, asignedFormulas: [...p.asignedFormulas, formula] } : p) })),
+  removeFormulaFromPaciente: (pacienteId: string, formulaId: string) => set((state) => ({ pacientes: state.pacientes.map((p) => p._id === pacienteId ? { ...p, asignedFormulas: p.asignedFormulas.filter((f) => f._id !== formulaId) } : p) })),
 }))
 
 export default useAdminStore

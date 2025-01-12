@@ -40,8 +40,10 @@ const FormularioCreacionPaciente = () => {
     if (response.status === 201) {
       const data = await response.json()
       setPacientes([...pacientes, data])
-      toast.success('Paciente creado correctamente')
-      router.push('/pacientes')
+      toast.success('Paciente creado correctamente', {
+        onClose: () => router.push('/pacientes'),
+        autoClose: 2000
+      })
     }
 
     if (response.status === 409) {

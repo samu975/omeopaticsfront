@@ -1,9 +1,15 @@
+'use client'
+
 import FormularioCreacionPaciente from '@/components/FormularioCreacionPaciente'
+import GoBack from '@/components/GoBack'
 import React from 'react'
 
 const page = () => {
   return (
-    <div className='p-4 h-screen bg-base-200 flex justify-center items-center flex-col gap-8'>
+    <div className='p-4 h-screen bg-base-200 flex justify-center items-center flex-col gap-8 -mt-10'>
+      <div className='flex justify-start w-full'>
+        <GoBack />
+      </div>
       <div className='flex flex-col gap-2'>
         <h1 className='text-4xl font-bold text-center md:text-left'>Crear un nuevo paciente</h1>
       </div>

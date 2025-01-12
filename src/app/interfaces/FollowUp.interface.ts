@@ -1,7 +1,7 @@
 import Answer from "./Answer.interface"
-import Question from "./Question.interface"
 
 interface FollowUp {
+  _id: string
   answers: Answer[]
 }
 

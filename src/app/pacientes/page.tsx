@@ -2,16 +2,18 @@
 import useAdminStore from '@/store/adminStore'
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useEffect } from 'react'
+import Link from 'next/link'
+import GoBack from '@/components/GoBack'
+import { toast, ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 const page = () => {
   const router = useRouter()
   
-  const titles = ['Nombre', 'Teléfono', 'Formularios asignados', 'Acciones']
-
   const { pacientes, setPacientes } = useAdminStore()
 
   const fecthPacientes = useCallback(async () => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/patients`)
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`)
     const data = await response.json()
     setPacientes(data)
   }, [])
@@ -20,41 +22,67 @@ const page = () => {
     fecthPacientes()
   }, [fecthPacientes])
 
-  const handleViewPaciente = (id: number) => {
-    router.push(`/pacientes/${id}/verPaciente`)
+  const handleDeletePaciente = async (id: string) => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${id}`, {
+      method: 'DELETE'
+    })
+    if (response.ok) {
+      setPacientes(pacientes.filter(paciente => paciente._id !== id))
+      toast.success('Paciente eliminado correctamente')
+    } else {
+      toast.error('Error al eliminar el paciente')
+    }
   }
 
-  const actions = (id: number) => {
+  const showPacientes = () => {
     return (
-      <td className='flex gap-3 justify-center items-center'>
-        <button className='btn btn-primary' onClick={() => {handleViewPaciente(id)}}>Ver paciente</button>
-      </td>
+      <div className="container mx-auto p-4">
+        <div className="flex justify-between items-center mb-6">
+          <Link href="/pacientes/crear" className="btn btn-primary">
+            Crear Paciente
+          </Link>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {pacientes.map((paciente) => (
+            <div key={paciente._id} className="card bg-base-100 shadow-xl">
+              <div className="card-body" >
+                <h2 className="card-title">{paciente.name}</h2>
+                <p key={paciente._id}>Teléfono: {paciente.phone}</p>
+                <div className="card-actions">
+                  <Link 
+                    href={`/pacientes/${paciente._id}/verPaciente`}
+                    className="btn btn-primary"
+                    key={`link-${paciente._id}`}
+                  >
+                    Ver Paciente
+                  </Link>
+                  <Link 
+                    href={`/pacientes/editar/${paciente._id}`}
+                    className='btn btn-secondary'
+                  >
+                    Editar
+                  </Link>
+                  <button className='btn btn-error' onClick={() => handleDeletePaciente(paciente._id)}>
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     )
   } 
 
-
   return (
-    <main className='h-screen bg-base-200 pt-20 px-10'>
+    <main className='h-auto bg-base-200 py-20 px-10'>
+      <div className="flex justify-start w-full mb-10 -mt-10">
+        <GoBack />
+      </div>
       <h1 className='font-bold text-3xl text-white'>Pacientes</h1>
-      <table className='table mt-8'>
-        <thead className='table-pin-cols'>
-          <tr>
-            {titles.map((title) => (
-              <th className='font-bold text-xl uppercase text-white' key={title}>{title}</th>
-            ))}
-          </tr>	
-        </thead>
-        <tbody>
-            {pacientes.map((paciente) => (
-              <tr key={paciente.id}>
-                <td>{paciente.name}</td>
-                <td>{paciente.phone}</td>
-                <td>{paciente.asignedFormulas.length}</td>
-                {actions(paciente.id)}
-              </tr>
-            ))}
-        </tbody>
-      </table>
+      {showPacientes()}
+      <ToastContainer position='bottom-left' autoClose={3000} />
     </main>
   )
 }
