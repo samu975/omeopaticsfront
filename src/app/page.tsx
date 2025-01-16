@@ -17,10 +17,6 @@ export default function Home() {
     router.push('/pacientes/crear')
   }
 
-  const handleCreateFormula = () => {
-    router.push('/formulas/crear')
-  }
-
   const handleFollowPatient = () => {
     router.push('/pacientes')
   }
@@ -35,7 +31,6 @@ export default function Home() {
       </div>
       <div className='flex flex-col gap-6 lg:flex-row'>
         <button className='btn btn-success' onClick={handleCreatePatient}>Crear un nuevo paciente</button>
-        <button className='btn btn-primary' onClick={handleCreateFormula}>Crear un nuevo formulario</button>
         <button className='btn btn-secondary' onClick={handleFollowPatient}>Seguir pacientes</button>
       </div>
     </div>
