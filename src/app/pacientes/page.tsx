@@ -1,15 +1,16 @@
 "use client"
 import useAdminStore from '@/store/adminStore'
 import { useRouter } from 'next/navigation'
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import GoBack from '@/components/GoBack'
+import Search from '@/components/Search'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
 const page = () => {
   const router = useRouter()
-  
+  const [searchTerm, setSearchTerm] = useState('')
   const { pacientes, setPacientes } = useAdminStore()
 
   const fecthPacientes = useCallback(async () => {
@@ -34,6 +35,12 @@ const page = () => {
     }
   }
 
+  // Filtrar pacientes basado en el término de búsqueda
+  const filteredPacientes = pacientes.filter(paciente =>
+    paciente.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    paciente.phone.includes(searchTerm)
+  )
+
   const showPacientes = () => {
     return (
       <div className="container mx-auto p-4">
@@ -43,8 +50,14 @@ const page = () => {
           </Link>
         </div>
 
+        <Search 
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          placeholder="Buscar por nombre o teléfono..."
+        />
+
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {pacientes.map((paciente) => (
+          {filteredPacientes.map((paciente) => (
             <div key={paciente._id} className="card bg-base-100 shadow-xl">
               <div className="card-body" >
                 <h2 className="card-title">{paciente.name}</h2>
@@ -71,6 +84,12 @@ const page = () => {
             </div>
           ))}
         </div>
+
+        {filteredPacientes.length === 0 && searchTerm && (
+          <p className="text-center text-gray-500 mt-4">
+            No se encontraron pacientes que coincidan con la búsqueda
+          </p>
+        )}
       </div>
     )
   } 

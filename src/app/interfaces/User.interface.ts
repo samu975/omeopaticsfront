@@ -1,7 +1,7 @@
 import Formula from "./Formula.interface"
 
 interface User {
-  id: number
+  _id: string
   name: string
   phone: string
   role: 'admin' | 'patient'
