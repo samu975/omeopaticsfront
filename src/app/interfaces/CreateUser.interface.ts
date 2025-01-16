@@ -1,7 +1,8 @@
 interface CreateUser {
   name: string
+  cedula: string
   phone: string
-  role: 'patient'
+  role: 'patient' | 'doctor'
   password: string
 }
 

@@ -21,6 +21,7 @@ const page = () => {
     role: 'patient',
     name: '',
     phone: '',
+    cedula: '',
     asignedFormulas: []
   })
 

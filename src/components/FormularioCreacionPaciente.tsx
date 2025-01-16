@@ -16,12 +16,14 @@ const FormularioCreacionPaciente = () => {
     role: 'patient',
     name: '',
     phone: '',
-    password: ''  
+    password: '',  
+    cedula: ''
   })
 
   const [error, setError] = useState({
     name: '',
-    phone: ''
+    phone: '',
+    cedula: ''
   })
 
   const{ pacientes, setPacientes} = useAdminStore()
@@ -78,7 +80,7 @@ const FormularioCreacionPaciente = () => {
   const handleUnShowError = () => {
     if (error) {
       setTimeout(() => {
-        setError({ name: '', phone: '' })
+        setError({ name: '', phone: '', cedula: '' })
       }, 10000);
     }
   }
@@ -90,10 +92,12 @@ const FormularioCreacionPaciente = () => {
   return (
     <form onSubmit={handleSubmit} className='flex flex-col gap-8'>
       <input type="text" name="name" placeholder="Nombre" onChange={handleChange} className='input input-bordered input-primary' />
+      <input type="text" name="cedula" placeholder="Cédula" onChange={handleChange} className='input input-bordered input-primary' />
       <input type="text" name="phone" placeholder="Teléfono" onChange={handleChange} className='input input-bordered input-primary' />
       <button type="submit" className='bg-success text-white p-2 rounded-md'>Crear Paciente</button>
       {error.name && <p className='text-red-500'>{error.name}</p>}
       {error.phone && <p className='text-red-500'>{error.phone}</p>}
+      {error.cedula && <p className='text-red-500'>{error.cedula}</p>}
       <ToastContainer position='bottom-center'/>
     </form>
 

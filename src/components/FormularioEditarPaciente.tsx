@@ -17,12 +17,14 @@ const FormularioEditarPaciente = ({ userId }: Props) => {
     role: 'patient',
     name: '',
     phone: '',
-    password: ''
+    password: '',
+    cedula: ''
   })
 
   const [error, setError] = useState({
     name: '',
-    phone: ''
+    phone: '',
+    cedula: ''
   })
 
   const { pacientes, setPacientes } = useAdminStore()
@@ -91,6 +93,10 @@ const FormularioEditarPaciente = ({ userId }: Props) => {
       setError(prev => ({ ...prev, phone: 'El teléfono debe tener al menos 10 caracteres' }))
       hasError = true
     }
+    if (patient.cedula.length < 10) {
+      setError(prev => ({ ...prev, cedula: 'La cédula debe tener al menos 10 caracteres' }))
+      hasError = true
+    }
 
     if (!hasError) {
       updatePaciente()
@@ -115,11 +121,20 @@ const FormularioEditarPaciente = ({ userId }: Props) => {
         onChange={handleChange} 
         className='input input-bordered input-primary' 
       />
+      <input 
+        type="text" 
+        name="cedula" 
+        placeholder="Cédula" 
+        value={patient.cedula}
+        onChange={handleChange} 
+        className='input input-bordered input-primary' 
+      />
       <button type="submit" className='bg-success text-white p-2 rounded-md'>
         Actualizar Paciente
       </button>
       {error.name && <p className='text-red-500'>{error.name}</p>}
       {error.phone && <p className='text-red-500'>{error.phone}</p>}
+      {error.cedula && <p className='text-red-500'>{error.cedula}</p>}
       <ToastContainer position='bottom-center'/>
     </form>
   )
