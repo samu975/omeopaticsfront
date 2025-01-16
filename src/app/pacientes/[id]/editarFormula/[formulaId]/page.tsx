@@ -116,6 +116,21 @@ const EditarFormula = () => {
     }))
   }
 
+  const handleDeleteOption = (questionId: number, optionId: number) => {
+    setFormula(prev => ({
+      ...prev,
+      questions: prev.questions.map(q => {
+        if (q.id === questionId) {
+          return {
+            ...q,
+            options: q.options?.filter(opt => opt.id !== optionId)
+          }
+        }
+        return q
+      })
+    }))
+  }
+
   useEffect(() => {
     fetchFormula()
   }, [fetchFormula])
@@ -189,14 +204,24 @@ const EditarFormula = () => {
                   {(question.type === 'multiple' || question.type === 'unica') && (
                     <div className='space-y-4'>
                       {question.options?.map((option) => (
-                        <input
-                          key={option.id}
-                          type="text"
-                          placeholder={`Opción ${option.id}`}
-                          className='input input-bordered w-full'
-                          value={option.text}
-                          onChange={(e) => handleOptionChange(question.id, option.id, e.target.value)}
-                        />
+                        <div key={option.id} className="flex gap-2 items-center">
+                          <input
+                            type="text"
+                            placeholder={`Opción ${option.id}`}
+                            className='input input-bordered w-full'
+                            value={option.text}
+                            onChange={(e) => handleOptionChange(question.id, option.id, e.target.value)}
+                          />
+                          <button 
+                            type="button"
+                            className="btn btn-circle btn-error btn-sm"
+                            onClick={() => handleDeleteOption(question.id, option.id)}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
                       ))}
                       <button
                         type="button"

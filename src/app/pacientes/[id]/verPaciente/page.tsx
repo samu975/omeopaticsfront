@@ -33,8 +33,11 @@ const page = () => {
   const fetchFormulas = useCallback(async () => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/formulas/user/${id}`)
     const data = await response.json()
-    setPatient({...patient, asignedFormulas: data})
-  }, [id])
+    setPatient(prevPatient => ({
+      ...prevPatient,
+      asignedFormulas: data
+    }))
+  }, [id, setPatient])
 
   const handleDeleteFormula = async (formulaId: string) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/formulas/${formulaId}`, {
@@ -42,6 +45,18 @@ const page = () => {
     })
     const data = await response.json()
     fetchFormulas()
+  }
+
+  const handleDeleteAnswer = async (formulaId: string, answerId: string) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/formulas/${formulaId}/answers/${answerId}`, {
+        method: 'DELETE'
+      })
+      const data = await response.json()
+      fetchFormulas()
+    } catch (error) {
+      console.error('Error al eliminar la respuesta:', error)
+    }
   }
 
   useEffect(() => {
@@ -73,9 +88,19 @@ const page = () => {
                 {formula.description}
               </p>
               {formula.answers?.map((answer, index) => (
-                <div key={answer.id || index}>
-                  <p>{answer.question.title}</p>
-                  <p>{answer.answer.join(', ')}</p>
+                <div key={answer.id || index} className="flex items-center justify-between bg-base-300 p-3 rounded-lg">
+                  <div>
+                    <p className="font-semibold">{answer.question.title}</p>
+                    <p className="text-gray-300">{answer.answer.join(', ')}</p>
+                  </div>
+                  <button 
+                    className="btn btn-circle btn-error btn-sm"
+                    onClick={() => handleDeleteAnswer(formula._id || '', answer.id || '')}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
                 </div>
               ))}
               {formula.answers?.length === 0 && <p className='text-center text-red-500'>El usuario no ha respondido el seguimiento</p>}
