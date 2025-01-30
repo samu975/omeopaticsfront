@@ -14,7 +14,7 @@ const Search = ({ searchTerm, setSearchTerm, placeholder = "Buscar..." }: Search
       <div className="flex">
         <input 
           type="text" 
-          placeholder={placeholder}
+          placeholder="Buscar por nombre, teléfono o cédula..."
           className="input input-bordered w-full rounded-r-none" 
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}

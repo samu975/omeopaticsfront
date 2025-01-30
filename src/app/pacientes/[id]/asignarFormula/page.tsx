@@ -2,7 +2,6 @@
 
 import Question from '@/app/interfaces/Question.interface'
 import User from '@/app/interfaces/User.interface'
-import GoBack from '@/components/GoBack'
 import { useParams, useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast, ToastContainer } from 'react-toastify'
@@ -10,6 +9,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import useFormulaStore from '@/store/formulaStore'
 import Formula from '@/app/interfaces/Formula.interface'
 import { MdDelete } from 'react-icons/md'
+import NavBar from '@/components/NavBar'
 
 type Patient = Omit<User, 'id' | 'token'> & {
   _id: string
@@ -140,9 +140,7 @@ const page = () => {
 
   return (
     <div className='p-4 min-h-screen bg-base-200 flex flex-col gap-8 py-20'>
-      <div className='flex justify-start w-full'>
-        <GoBack />
-      </div>
+      <NavBar />
       
       <div className='container mx-auto max-w-3xl'>
         <h1 className='text-4xl font-bold mb-8'>

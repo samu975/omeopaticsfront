@@ -2,9 +2,9 @@
 
 import Formula from '@/app/interfaces/Formula.interface';
 import User from '@/app/interfaces/User.interface';
-import GoBack from '@/components/GoBack'
 import { useParams, useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react'
+import NavBar from '@/components/NavBar'
 
 type Patient = Omit<User, 'id' | 'token' | 'asignedFormulas'> & {
   _id: string
@@ -70,9 +70,7 @@ const page = () => {
 
   return (
     <div className='p-4 h-screen bg-base-200 flex justify-center items-center flex-col gap-8 -mt-10'>
-      <div className="flex justify-start w-full">
-        <GoBack />
-      </div>
+      <NavBar />
       <div className="flex flex-col gap-2">
         <h1 className="text-4xl font-bold text-center md:text-left">Paciente: <span className='text-primary'>{patient.name}</span> </h1>
       </div>

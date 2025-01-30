@@ -3,11 +3,10 @@ import useAdminStore from '@/store/adminStore'
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import GoBack from '@/components/GoBack'
 import Search from '@/components/Search'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-
+import NavBar from '@/components/NavBar'
 const page = () => {
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState('')
@@ -38,7 +37,8 @@ const page = () => {
   // Filtrar pacientes basado en el término de búsqueda
   const filteredPacientes = pacientes.filter(paciente =>
     paciente.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    paciente.phone.includes(searchTerm)
+    paciente.phone.includes(searchTerm) ||
+    paciente.cedula?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const showPacientes = () => {
@@ -53,7 +53,7 @@ const page = () => {
         <Search 
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
-          placeholder="Buscar por nombre o teléfono..."
+          placeholder="Buscar por nombre, teléfono o cédula..."
         />
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -61,7 +61,8 @@ const page = () => {
             <div key={paciente._id} className="card bg-base-100 shadow-xl">
               <div className="card-body" >
                 <h2 className="card-title">{paciente.name}</h2>
-                <p key={paciente._id}>Teléfono: {paciente.phone}</p>
+                <p key={paciente.phone}>Teléfono: {paciente.phone}</p>
+                <p key={paciente.cedula}>Cédula: {paciente.cedula}</p>
                 <div className="card-actions">
                   <Link 
                     href={`/pacientes/${paciente._id}/verPaciente`}
@@ -96,9 +97,7 @@ const page = () => {
 
   return (
     <main className='h-auto bg-base-200 py-20 px-10'>
-      <div className="flex justify-start w-full mb-10 -mt-10">
-        <GoBack />
-      </div>
+      <NavBar />
       <h1 className='font-bold text-3xl text-white'>Pacientes</h1>
       {showPacientes()}
       <ToastContainer position='bottom-left' autoClose={3000} />
