@@ -1,39 +1,37 @@
 'use client'
+import React, { useEffect, useState } from 'react'
+import AdminDashboard from './doctorScreen/page'
+import UserDashboard from './userScreen/page'
 import { useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
 
-export default function Home() {
-  const [isClient, setIsClient] = useState(false)
+const page = () => {
   const router = useRouter()
+  const [role, setRole] = useState<string>('')
+
   useEffect(() => {
-    setIsClient(true)
+    const user = localStorage.getItem("user")
+    if (!user) {
+      router.push("/login")
+    } else {
+      try {
+        const userData = JSON.parse(user)
+        setRole(userData.user.role)
+      } catch (error) {
+        console.error('Error parsing user data:', error)
+        router.push("/login")
+      }
+    }
   }, [])
 
-  if (!isClient) {
-    return null
-  }
+  console.log(role)
 
-  const handleCreatePatient = () => {
-    router.push('/pacientes/crear')
-  }
-
-  const handleFollowPatient = () => {
-    router.push('/pacientes')
-  }
+  if (!role) return null
 
   return (
-   <>
-    <div className='flex flex-col items-center justify-center h-screen bg-base-200 p-4'>
-      <div className='flex flex-col gap-2 my-8'>
-        <h1 className='text-4xl font-bold text-left'>Hola, Christian</h1>
-        <h2 className='text-2xl font-bold text-left'>Bienvenido a la aplicación de formularios</h2>
-        <h2 className='text-2xl font-bold text-left'>¿Qué desea hacer?</h2>
-      </div>
-      <div className='flex flex-col gap-6 lg:flex-row'>
-        <button className='btn btn-success' onClick={handleCreatePatient}>Crear un nuevo paciente</button>
-        <button className='btn btn-secondary' onClick={handleFollowPatient}>Seguir pacientes</button>
-      </div>
+    <div>
+      {role === "admin" ? <AdminDashboard /> : <UserDashboard />}
     </div>
-   </>
-  );
+  )
 }
+
+export default page
