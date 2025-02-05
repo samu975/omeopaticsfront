@@ -21,9 +21,20 @@ export default function Home() {
     router.push('/pacientes')
   }
 
+  const handleLogout = () => {
+    localStorage.removeItem('user')
+    router.push('/login')
+  }
+
   return (
    <>
-    <div className='flex flex-col items-center justify-center h-screen bg-base-200 p-4'>
+   <div className='h-screen bg-base-200 p-6'>
+    <div className='w-full pt-10'>
+      <div className='flex justify-end'>
+        <button className='btn btn-sm btn-ghost' onClick={handleLogout}>Cerrar sesión</button>
+      </div>
+    </div>
+    <div className='flex flex-col items-center justify-center bg-base-200 p-4 mt-10'>
       <div className='flex flex-col gap-2 my-8'>
         <h1 className='text-4xl font-bold text-left'>Hola, Christian</h1>
         <h2 className='text-2xl font-bold text-left'>Bienvenido a la aplicación de formularios</h2>
@@ -34,6 +45,7 @@ export default function Home() {
         <button className='btn btn-secondary' onClick={handleFollowPatient}>Seguir pacientes</button>
       </div>
     </div>
+   </div>
    </>
   );
 }

@@ -37,7 +37,18 @@ const EditarFormula = () => {
       toast.error('Error al cargar la fórmula')
     }
   }, [formulaId])
-
+  const handleAddQuestion = () => {
+    const newQuestion: Question = {
+      id: (formula.questions?.length || 0) + 1,
+      title: '',
+      type: 'abierta',
+      options: []
+    }
+    setFormula(prev => ({
+      ...prev,
+      questions: [...(prev.questions || []), newQuestion]
+    }))
+  }
   const handleQuestionChange = (questionId: number, field: keyof Question, value: any) => {
     setFormula(prev => ({
       ...prev,
@@ -86,12 +97,43 @@ const EditarFormula = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
+      // Validate required fields
+      if (!formula.name || !formula.description) {
+        toast.error('El nombre y la descripción son obligatorios')
+        return
+      }
+
+      // Validate questions
+      if (!formula.questions || formula.questions.length === 0) {
+        toast.error('Debe agregar al menos una pregunta')
+        return
+      }
+
+      // Validate each question
+      for (const question of formula.questions) {
+        if (!question.title) {
+          toast.error('Todas las preguntas deben tener un título')
+          return
+        }
+        if ((question.type === 'multiple' || question.type === 'unica') && 
+            (!question.options || question.options.length === 0)) {
+          toast.error('Las preguntas de tipo múltiple o única deben tener opciones')
+          return
+        }
+      }
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/formulas/${formulaId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(formula)
+        body: JSON.stringify({
+          ...formula,
+          questions: formula.questions.map(q => ({
+            ...q,
+            options: q.options || []
+          }))
+        })
       })
 
       if (response.ok) {
@@ -102,9 +144,11 @@ const EditarFormula = () => {
           autoClose: 2000
         })
       } else {
-        toast.error('Error al actualizar la fórmula')
+        const errorData = await response.json()
+        toast.error(errorData.message || 'Error al actualizar la fórmula')
       }
     } catch (error) {
+      console.error('Error:', error)
       toast.error('Error al actualizar la fórmula')
     }
   }
@@ -234,13 +278,22 @@ const EditarFormula = () => {
               </div>
             ))}
           </div>
+          <div className='space-x-4'>
+            <button
+              type="button"
+              className='btn btn-primary'
+              onClick={handleAddQuestion}
+            >
+              Agregar Nueva Pregunta
+            </button>
 
-          <button
-            type="submit"
-            className='btn btn-success'
-          >
-            Actualizar Fórmula
-          </button>
+            <button
+              type="submit"
+              className='btn btn-success'
+            >
+              Actualizar Fórmula
+            </button>
+          </div>
         </form>
       </div>
       <ToastContainer position='bottom-center'/>
@@ -248,4 +301,4 @@ const EditarFormula = () => {
   )
 }
 
-export default EditarFormula 
+export default EditarFormula

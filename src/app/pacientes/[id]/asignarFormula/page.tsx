@@ -87,10 +87,38 @@ const page = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    // Validate required fields
+    if (!formulaData.name || !formulaData.description) {
+      toast.error('El nombre y la descripción son obligatorios')
+      return
+    }
+
+    // Validate questions
+    if (!questions || questions.length === 0) {
+      toast.error('Debe agregar al menos una pregunta')
+      return
+    }
+
+    // Validate each question
+    for (const question of questions) {
+      if (!question.title) {
+        toast.error('Todas las preguntas deben tener un título')
+        return
+      }
+      if ((question.type === 'multiple' || question.type === 'unica') && 
+          (!question.options || question.options.length === 0)) {
+        toast.error('Las preguntas de tipo múltiple o única deben tener opciones')
+        return
+      }
+    }
+    
     const newFormula: Formula = {
       name: formulaData.name,
       description: formulaData.description,
-      questions: questions,
+      questions: questions.map(q => ({
+        ...q,
+        options: q.options || []
+      })),
       answers: []
     };
     
@@ -111,9 +139,11 @@ const page = () => {
           autoClose: 2000
         });
       } else {
-        toast.error('Error al crear la fórmula');
+        const errorData = await response.json();
+        toast.error(errorData.message || 'Error al crear la fórmula');
       }
     } catch (error) {
+      console.error('Error:', error);
       toast.error('Error al crear la fórmula');
     }
   };
