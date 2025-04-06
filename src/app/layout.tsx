@@ -21,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="es" data-theme="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`text-white ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
       </body>

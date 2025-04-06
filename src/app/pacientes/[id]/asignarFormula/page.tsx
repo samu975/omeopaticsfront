@@ -24,7 +24,8 @@ const page = () => {
   const [questions, setQuestions] = useState<Question[]>([])
   const [formulaData, setFormulaData] = useState({
     name: '',
-    description: ''
+    description: '',
+    remainingAnswers: ''
   })
 
   const { addFormula } = useFormulaStore()
@@ -84,6 +85,7 @@ const page = () => {
     }))
   }
 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -92,6 +94,7 @@ const page = () => {
       toast.error('El nombre y la descripción son obligatorios')
       return
     }
+
 
     // Validate questions
     if (!questions || questions.length === 0) {

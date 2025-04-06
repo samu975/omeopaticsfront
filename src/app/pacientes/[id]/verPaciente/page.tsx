@@ -102,14 +102,6 @@ const page = () => {
                         <p className="font-semibold">{answer.question.title}</p>
                         <p className="text-gray-300">{answer.answer.join(', ')}</p>
                       </div>
-                      <button 
-                        className="btn btn-circle btn-error btn-sm"
-                        onClick={() => handleDeleteAnswer(formula._id || '', answer.id || '')}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
                     </div>
                   ))}
                   {formula.answers?.length === 0 && 
