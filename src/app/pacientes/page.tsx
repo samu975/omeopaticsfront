@@ -11,6 +11,8 @@ const page = () => {
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState('')
   const { pacientes, setPacientes } = useAdminStore()
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedPacienteId, setSelectedPacienteId] = useState('')
 
   const fecthPacientes = useCallback(async () => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`)
@@ -26,7 +28,7 @@ const page = () => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${id}`, {
       method: 'DELETE'
     })
-    if (response.ok) {
+    if (response.ok && pacientes.length > 0) {
       setPacientes(pacientes.filter(paciente => paciente._id !== id))
       toast.success('Paciente eliminado correctamente')
     } else {
@@ -34,12 +36,39 @@ const page = () => {
     }
   }
 
+  const openConfirmationModal = (id: string) => {
+    setSelectedPacienteId(id)
+    setIsModalOpen(true)
+  }
+
+  const closeConfirmationModal = () => {
+    setSelectedPacienteId('')
+    setIsModalOpen(false)
+  }
+
   // Filtrar pacientes basado en el término de búsqueda
-  const filteredPacientes = pacientes.filter(paciente =>
+  const filteredPacientes = pacientes.length > 0 ? pacientes.filter(paciente =>
     paciente.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     paciente.phone.includes(searchTerm) ||
     paciente.cedula?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  ) : null
+
+  const ConfirmationModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void, onConfirm: () => void }) => {
+    return (
+      <dialog id="delete_modal" className={`modal ${isOpen ? 'modal-open' : ''}`}>
+        <div className="modal-box">
+          <h3 className="font-bold text-lg">Desea eliminar el paciente?</h3>
+          <div className="modal-action">
+            <button className="btn btn-error" onClick={() => {
+              onClose()
+              handleDeletePaciente(selectedPacienteId)
+            }}>Eliminar</button>
+            <button className="btn btn-secondary" onClick={onClose}>Cancelar</button>
+          </div>
+        </div>
+      </dialog>
+    )
+  }
 
   const showPacientes = () => {
     return (
@@ -57,7 +86,7 @@ const page = () => {
         />
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredPacientes.map((paciente) => (
+          {filteredPacientes && filteredPacientes.map((paciente) => (
             <div key={paciente._id} className="card bg-base-100 shadow-xl">
               <div className="card-body" >
                 <h2 className="card-title">{paciente.name}</h2>
@@ -77,7 +106,7 @@ const page = () => {
                   >
                     Editar
                   </Link>
-                  <button className='btn btn-error' onClick={() => handleDeletePaciente(paciente._id)}>
+                  <button className='btn btn-error' onClick={() => openConfirmationModal(paciente._id)}>
                     Eliminar
                   </button>
                 </div>
@@ -86,7 +115,15 @@ const page = () => {
           ))}
         </div>
 
-        {filteredPacientes.length === 0 && searchTerm && (
+        {isModalOpen && (
+          <ConfirmationModal 
+            isOpen={isModalOpen}
+            onClose={closeConfirmationModal}
+            onConfirm={() => handleDeletePaciente(selectedPacienteId)}
+          />
+        )}
+
+        {filteredPacientes && filteredPacientes.length === 0 && searchTerm && (
           <p className="text-center text-gray-500 mt-4">
             No se encontraron pacientes que coincidan con la búsqueda
           </p>

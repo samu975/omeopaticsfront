@@ -41,7 +41,7 @@ const FormularioCreacionPaciente = () => {
     })
     if (response.status === 201) {
       const data = await response.json()
-      setPacientes([...pacientes, data])
+      pacientes.length > 0 ? setPacientes([...pacientes, data]) : setPacientes([data])
       toast.success('Paciente creado correctamente', {
         onClose: () => router.push('/pacientes'),
         autoClose: 2000
@@ -49,7 +49,7 @@ const FormularioCreacionPaciente = () => {
     }
 
     if (response.status === 409) {
-      toast.error('No pueden existir pacientes con el mismo numero')
+      toast.error('No pueden existir pacientes con la misma cédula')
     }
     
   }
