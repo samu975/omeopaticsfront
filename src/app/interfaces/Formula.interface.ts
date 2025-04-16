@@ -5,6 +5,7 @@ interface Formula {
   _id?: string;
   name: string;
   description: string;
+  dosis: string;
   questions: Question[];
   answers?: Answer[];
   createdAt?: Date;

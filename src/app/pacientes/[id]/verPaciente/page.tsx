@@ -5,6 +5,8 @@ import User from '@/app/interfaces/User.interface';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react'
 import NavBar from '@/components/NavBar'
+import { toast } from 'react-toastify';
+import ModalAcceptDelete from '@/components/ModalAcceptDelete';
 
 type Patient = Omit<User, 'id' | 'token' | 'asignedFormulas'> & {
   _id: string
@@ -24,6 +26,9 @@ const page = () => {
     cedula: '',
     asignedFormulas: []
   })
+  
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedFormulaId, setSelectedFormulaId] = useState('')
 
   const fetchPatient = useCallback(async () => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${id}`)
@@ -45,19 +50,20 @@ const page = () => {
       method: 'DELETE'
     })
     const data = await response.json()
+    if (data){
+      toast.success('Formula eliminada correctamente')
+    }
     fetchFormulas()
   }
 
-  const handleDeleteAnswer = async (formulaId: string, answerId: string) => {
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/formulas/${formulaId}/answers/${answerId}`, {
-        method: 'DELETE'
-      })
-      const data = await response.json()
-      fetchFormulas()
-    } catch (error) {
-      console.error('Error al eliminar la respuesta:', error)
-    }
+  const openConfirmationModal = (formulaId: string) => {
+    setSelectedFormulaId(formulaId)
+    setIsModalOpen(true)
+  }
+
+  const closeConfirmationModal = () => {
+    setSelectedFormulaId('')
+    setIsModalOpen(false)
   }
 
   useEffect(() => {
@@ -93,6 +99,9 @@ const page = () => {
                   <p className='text-lg text-center md:text-left'>
                     {formula.description}
                   </p>
+                  <p className='text-lg text-center md:text-left'>
+                    {formula.dosis}
+                  </p>
                   {formula.answers?.map((answer, answerIndex) => (
                     <div 
                       key={`answer-${answer.id || formula._id}-${answerIndex}`} 
@@ -101,6 +110,17 @@ const page = () => {
                       <div>
                         <p className="font-semibold">{answer.question.title}</p>
                         <p className="text-gray-300">{answer.answer.join(', ')}</p>
+                        {answer.createdAt && (
+                          <p className="text-xs text-gray-400 mt-1">
+                            Contestado el: {new Date(answer.createdAt).toLocaleDateString('es-ES', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -116,7 +136,7 @@ const page = () => {
                     </button>
                     <button 
                       className='btn btn-error' 
-                      onClick={() => handleDeleteFormula(formula._id || '')}
+                      onClick={() => openConfirmationModal(formula._id || '')}
                     >
                       Eliminar formula
                     </button>
@@ -136,6 +156,17 @@ const page = () => {
           </button>
         </div>
       </div>
+      
+      <ModalAcceptDelete 
+        isOpen={isModalOpen}
+        title="Eliminar Fórmula"
+        message="¿Está seguro que desea eliminar esta fórmula? Esta acción no se puede deshacer."
+        onAccept={() => {
+          closeConfirmationModal();
+          handleDeleteFormula(selectedFormulaId);
+        }}
+        onClose={closeConfirmationModal}
+      />
     </div>
   )
 }

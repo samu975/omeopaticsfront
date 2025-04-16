@@ -18,6 +18,7 @@ const EditarFormula = () => {
   const [formula, setFormula] = useState<Formula>({
     name: '',
     description: '',
+    dosis: '',
     questions: []
   })
 
@@ -98,8 +99,8 @@ const EditarFormula = () => {
     e.preventDefault()
     try {
       // Validate required fields
-      if (!formula.name || !formula.description) {
-        toast.error('El nombre y la descripción son obligatorios')
+      if (!formula.name || !formula.description || !formula.dosis) {
+        toast.error('El nombre, la descripción y la dosis son obligatorios')
         return
       }
 
@@ -208,6 +209,15 @@ const EditarFormula = () => {
                 onChange={(e) => setFormula({...formula, description: e.target.value})}
               />
             </div>
+          </div>
+
+          <div>
+            <label className='label'>Dosis</label>
+            <textarea 
+              className='textarea textarea-bordered w-full'
+              value={formula.dosis}
+              onChange={(e) => setFormula({...formula, dosis: e.target.value})}
+            />
           </div>
 
           <div className='space-y-6'>

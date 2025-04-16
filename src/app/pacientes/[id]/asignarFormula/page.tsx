@@ -25,6 +25,7 @@ const page = () => {
   const [formulaData, setFormulaData] = useState({
     name: '',
     description: '',
+    dosis: '',
     remainingAnswers: ''
   })
 
@@ -118,6 +119,7 @@ const page = () => {
     const newFormula: Formula = {
       name: formulaData.name,
       description: formulaData.description,
+      dosis: formulaData.dosis,
       questions: questions.map(q => ({
         ...q,
         options: q.options || []
@@ -172,15 +174,15 @@ const page = () => {
   }, [fetchPatient])
 
   return (
-    <div className='p-4 min-h-screen bg-base-200 flex flex-col gap-8 py-20'>
+    <div className='bg-base-200 gap-8 py-20 w-full'>
       <NavBar />
       
       <div className='container mx-auto max-w-3xl'>
-        <h1 className='text-4xl font-bold mb-8'>
+        <h1 className='text-2xl font-bold px-8 mb-8 sm:text-3xl md:text-4xl lg:text-5xl'>
           Asignar fórmula al paciente: <span className='text-primary'>{patient?.name}</span>
         </h1>
 
-        <form onSubmit={handleSubmit} className='space-y-6'>
+        <form onSubmit={handleSubmit} className='space-y-6 px-8'>
           <div className='space-y-4'>
             <div>
               <label className='label'>Nombre de la fórmula</label>
@@ -200,6 +202,15 @@ const page = () => {
                 onChange={(e) => setFormulaData({...formulaData, description: e.target.value})}
               />
             </div>
+          </div>
+
+          <div>
+            <label className='label'>Dosis</label>
+            <textarea 
+              className='textarea textarea-bordered w-full'
+              value={formulaData.dosis}
+              onChange={(e) => setFormulaData({...formulaData, dosis: e.target.value})}
+            />
           </div>
 
           <div className='space-y-6'>
@@ -271,7 +282,7 @@ const page = () => {
             ))}
           </div>
 
-          <div className='space-x-4'>
+          <div className='flex flex-col sm:flex-row gap-4 justify-between'>
             <button
               type="button"
               className='btn btn-primary'

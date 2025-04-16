@@ -7,6 +7,8 @@ import Search from '@/components/Search'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import NavBar from '@/components/NavBar'
+import ModalAcceptDelete from '@/components/ModalAcceptDelete'
+
 const page = () => {
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState('')
@@ -53,23 +55,6 @@ const page = () => {
     paciente.cedula?.toLowerCase().includes(searchTerm.toLowerCase())
   ) : null
 
-  const ConfirmationModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void, onConfirm: () => void }) => {
-    return (
-      <dialog id="delete_modal" className={`modal ${isOpen ? 'modal-open' : ''}`}>
-        <div className="modal-box">
-          <h3 className="font-bold text-lg">Desea eliminar el paciente?</h3>
-          <div className="modal-action">
-            <button className="btn btn-error" onClick={() => {
-              onClose()
-              handleDeletePaciente(selectedPacienteId)
-            }}>Eliminar</button>
-            <button className="btn btn-secondary" onClick={onClose}>Cancelar</button>
-          </div>
-        </div>
-      </dialog>
-    )
-  }
-
   const showPacientes = () => {
     return (
       <div className="container mx-auto p-4">
@@ -115,13 +100,16 @@ const page = () => {
           ))}
         </div>
 
-        {isModalOpen && (
-          <ConfirmationModal 
-            isOpen={isModalOpen}
-            onClose={closeConfirmationModal}
-            onConfirm={() => handleDeletePaciente(selectedPacienteId)}
-          />
-        )}
+        <ModalAcceptDelete 
+          isOpen={isModalOpen}
+          title="Eliminar Paciente"
+          message="¿Está seguro que desea eliminar este paciente? Esta acción no se puede deshacer."
+          onAccept={() => {
+            closeConfirmationModal();
+            handleDeletePaciente(selectedPacienteId);
+          }}
+          onClose={closeConfirmationModal}
+        />
 
         {filteredPacientes && filteredPacientes.length === 0 && searchTerm && (
           <p className="text-center text-gray-500 mt-4">
