@@ -21,7 +21,7 @@ export default function Home() {
     const localStorage = window.localStorage.getItem('user')
     const transformedObject = JSON.parse(localStorage as string)
     if (transformedObject) {
-      setUser(transformedObject.user)
+      setUser(transformedObject)
     }
 
     if (!transformedObject) {

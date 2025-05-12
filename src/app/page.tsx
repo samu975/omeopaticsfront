@@ -15,15 +15,13 @@ const page = () => {
     } else {
       try {
         const userData = JSON.parse(user)
-        setRole(userData.user.role)
+        setRole(userData.role)
       } catch (error) {
         console.error('Error parsing user data:', error)
         router.push("/login")
       }
     }
   }, [])
-
-  console.log(role)
 
   if (!role) return null
 

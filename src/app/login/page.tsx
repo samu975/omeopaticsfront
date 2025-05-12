@@ -1,20 +1,18 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import React, { useState } from 'react'
+import { useState } from 'react'
+import { useAuthContext } from '@/contexts/AuthContext'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import useUserStore from '@/store/userStore'
-
-const LoginPage = () => {
-  const router = useRouter()
-  const { setUser } = useUserStore()
+import { useRouter } from 'next/navigation'
+export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [credentials, setCredentials] = useState({
     cedula: '',
     password: ''
   })
-
+  const { login } = useAuthContext()
+  const router = useRouter()
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCredentials({
       ...credentials,
@@ -33,30 +31,11 @@ const LoginPage = () => {
     setLoading(true)
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(credentials)
-      })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        // Store user data in localStorage and Zustand
-        localStorage.setItem('user', JSON.stringify(data))
-        setUser(data)
-        
-        toast.success('Login exitoso', {
-          onClose: () => router.push('/'),
-          autoClose: 2000
-        })
-      } else {
-        toast.error(data.message || 'Credenciales inválidas')
-      }
+      await login(credentials.cedula, credentials.password)
+      toast.success('Login exitoso')
+      router.push('/')
     } catch (error) {
-      toast.error('Error al conectar con el servidor')
+      toast.error('Credenciales inválidas')
     } finally {
       setLoading(false)
     }
@@ -112,5 +91,3 @@ const LoginPage = () => {
     </div>
   )
 }
-
-export default LoginPage

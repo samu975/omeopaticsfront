@@ -21,12 +21,10 @@ const page = () => {
   const id = params.id
 
   const [patient, setPatient] = useState<Patient | null>(null)
-  const [questions, setQuestions] = useState<Question[]>([])
   const [formulaData, setFormulaData] = useState({
     name: '',
     description: '',
-    dosis: '',
-    remainingAnswers: ''
+    dosis: ''
   })
 
   const { addFormula } = useFormulaStore()
@@ -37,96 +35,19 @@ const page = () => {
     setPatient(data)
   }, [id])
 
-  const handleAddQuestion = () => {
-    const newQuestion: Question = {
-      id: questions.length + 1,
-      title: '',
-      type: 'abierta',
-      options: []
-    }
-    setQuestions([...questions, newQuestion])
-  }
-
-  const handleQuestionChange = (questionId: number, field: keyof Question, value: any) => {
-    setQuestions(questions.map(q => {
-      if (q.id === questionId) {
-        return { ...q, [field]: value }
-      }
-      return q
-    }))
-  }
-
-  const handleAddOption = (questionId: number) => {
-    setQuestions(questions.map(q => {
-      if (q.id === questionId) {
-        const newOption = {
-          id: (q.options?.length || 0) + 1,
-          text: ''
-        }
-        return {
-          ...q,
-          options: [...(q.options || []), newOption]
-        }
-      }
-      return q
-    }))
-  }
-
-  const handleOptionChange = (questionId: number, optionId: number, value: string) => {
-    setQuestions(questions.map(q => {
-      if (q.id === questionId) {
-        return {
-          ...q,
-          options: q.options?.map(opt => 
-            opt.id === optionId ? { ...opt, text: value } : opt
-          )
-        }
-      }
-      return q
-    }))
-  }
-
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    // Validate required fields
-    if (!formulaData.name || !formulaData.description) {
-      toast.error('El nombre y la descripción son obligatorios')
+    if (!formulaData.name || !formulaData.description || !formulaData.dosis) {
+      toast.error('Todos los campos son obligatorios')
       return
     }
-
-
-    // Validate questions
-    if (!questions || questions.length === 0) {
-      toast.error('Debe agregar al menos una pregunta')
-      return
-    }
-
-    // Validate each question
-    for (const question of questions) {
-      if (!question.title) {
-        toast.error('Todas las preguntas deben tener un título')
-        return
-      }
-      if ((question.type === 'multiple' || question.type === 'unica') && 
-          (!question.options || question.options.length === 0)) {
-        toast.error('Las preguntas de tipo múltiple o única deben tener opciones')
-        return
-      }
-    }
-    
     const newFormula: Formula = {
       name: formulaData.name,
       description: formulaData.description,
       dosis: formulaData.dosis,
-      questions: questions.map(q => ({
-        ...q,
-        options: q.options || []
-      })),
+      questions: [],
       answers: []
     };
-    
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/formulas/${id}/followup`, {
         method: 'POST',
@@ -135,7 +56,6 @@ const page = () => {
         },
         body: JSON.stringify(newFormula)
       });
-
       if (response.ok) {
         const savedFormula = await response.json();
         addFormula(savedFormula);
@@ -153,22 +73,6 @@ const page = () => {
     }
   };
 
-  const handleDeleteQuestion = (questionId: number) => {
-    setQuestions(questions.filter(q => q.id !== questionId))
-  }
-
-  const handleDeleteOption = (questionId: number, optionId: number) => {
-    setQuestions(questions.map(q => {
-      if (q.id === questionId) {
-        return {
-          ...q,
-          options: q.options?.filter(opt => opt.id !== optionId)
-        }
-      }
-      return q
-    }))
-  }
-
   useEffect(() => {
     fetchPatient()
   }, [fetchPatient])
@@ -176,12 +80,10 @@ const page = () => {
   return (
     <div className='bg-base-200 gap-8 py-20 w-full'>
       <NavBar />
-      
       <div className='container mx-auto max-w-3xl'>
         <h1 className='text-2xl font-bold px-8 mb-8 sm:text-3xl md:text-4xl lg:text-5xl'>
           Asignar fórmula al paciente: <span className='text-primary'>{patient?.name}</span>
         </h1>
-
         <form onSubmit={handleSubmit} className='space-y-6 px-8'>
           <div className='space-y-4'>
             <div>
@@ -193,7 +95,6 @@ const page = () => {
                 onChange={(e) => setFormulaData({...formulaData, name: e.target.value})}
               />
             </div>
-
             <div>
               <label className='label'>Descripción de la fórmula</label>
               <textarea 
@@ -202,95 +103,16 @@ const page = () => {
                 onChange={(e) => setFormulaData({...formulaData, description: e.target.value})}
               />
             </div>
+            <div>
+              <label className='label'>Dosis</label>
+              <textarea 
+                className='textarea textarea-bordered w-full'
+                value={formulaData.dosis}
+                onChange={(e) => setFormulaData({...formulaData, dosis: e.target.value})}
+              />
+            </div>
           </div>
-
-          <div>
-            <label className='label'>Dosis</label>
-            <textarea 
-              className='textarea textarea-bordered w-full'
-              value={formulaData.dosis}
-              onChange={(e) => setFormulaData({...formulaData, dosis: e.target.value})}
-            />
-          </div>
-
-          <div className='space-y-6'>
-            {questions.map((question) => (
-              <div key={question.id} className='card bg-base-100 shadow-xl p-6'>
-                <div className='flex justify-between items-center mb-4'>
-                  <h3 className='font-bold text-lg'>Pregunta {question.id}</h3>
-                  <button
-                    type="button"
-                    className='btn btn-ghost btn-circle text-error'
-                    onClick={() => handleDeleteQuestion(question.id)}
-                  >
-                    <MdDelete size={24} />
-                  </button>
-                </div>
-                
-                <div className='space-y-4'>
-                  <input
-                    type="text"
-                    placeholder="Título de la pregunta"
-                    className='input input-bordered w-full'
-                    value={question.title}
-                    onChange={(e) => handleQuestionChange(question.id, 'title', e.target.value)}
-                  />
-
-                  <select
-                    className='select select-bordered w-full'
-                    value={question.type}
-                    onChange={(e) => handleQuestionChange(question.id, 'type', e.target.value)}
-                  >
-                    <option value="abierta">Abierta</option>
-                    <option value="multiple">Múltiple</option>
-                    <option value="unica">Única</option>
-                  </select>
-
-                  {(question.type === 'multiple' || question.type === 'unica') && (
-                    <div className='space-y-4'>
-                      {question.options?.map((option) => (
-                        <div key={option.id} className="flex gap-2 items-center">
-                          <input
-                            type="text"
-                            placeholder={`Opción ${option.id}`}
-                            className='input input-bordered w-full'
-                            value={option.text}
-                            onChange={(e) => handleOptionChange(question.id, option.id, e.target.value)}
-                          />
-                          <button 
-                            type="button"
-                            className="btn btn-circle btn-error btn-sm"
-                            onClick={() => handleDeleteOption(question.id, option.id)}
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
-                      <button
-                        type="button"
-                        className='btn btn-secondary'
-                        onClick={() => handleAddOption(question.id)}
-                      >
-                        Agregar Opción
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-
           <div className='flex flex-col sm:flex-row gap-4 justify-between'>
-            <button
-              type="button"
-              className='btn btn-primary'
-              onClick={handleAddQuestion}
-            >
-              Agregar Nueva Pregunta
-            </button>
-
             <button
               type="submit"
               className='btn btn-success'

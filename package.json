@@ -9,7 +9,16 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/js-cookie": "^3.0.6",
+    "@types/jsonwebtoken": "^9.0.9",
     "axios": "^1.7.9",
+    "bcryptjs": "^3.0.2",
+    "jose": "^6.0.11",
+    "js-cookie": "^3.0.5",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.16.0",
+    "mongoose": "^8.14.2",
     "next": "15.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

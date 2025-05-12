@@ -7,6 +7,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import NavBar from '@/components/NavBar'
 import { toast } from 'react-toastify';
 import ModalAcceptDelete from '@/components/ModalAcceptDelete';
+import { formulaService } from '@/services/api';
 
 type Patient = Omit<User, 'id' | 'token' | 'asignedFormulas'> & {
   _id: string
@@ -37,12 +38,26 @@ const page = () => {
   }, [id])
 
   const fetchFormulas = useCallback(async () => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/formulas/user/${id}`)
-    const data = await response.json()
+    // Obtener el usuario para extraer los IDs de las fórmulas asignadas
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${id}`);
+    const data = await response.json();
+    const formulaIds = data.asignedFormulas || [];
+
+    // Obtener los datos completos de cada fórmula
+    const formulasData = await Promise.all(
+      formulaIds.map(async (formulaId: string) => {
+        try {
+          return await formulaService.getById(formulaId);
+        } catch (e) {
+          return null;
+        }
+      })
+    );
+
     setPatient(prevPatient => ({
       ...prevPatient,
-      asignedFormulas: data
-    }))
+      asignedFormulas: formulasData.filter(Boolean)
+    }));
   }, [id, setPatient])
 
   const handleDeleteFormula = async (formulaId: string) => {
