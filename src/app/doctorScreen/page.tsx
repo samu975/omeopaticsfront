@@ -63,6 +63,7 @@ export default function Home() {
       <div className='flex flex-col gap-6 lg:flex-row'>
         <button className='btn btn-success' onClick={handleCreatePatient}>Crear un nuevo paciente</button>
         <button className='btn btn-secondary' onClick={handleFollowPatient}>Seguir pacientes</button>
+        <button className='btn btn-info' onClick={() => router.push('/banco-preguntas')}>Banco de preguntas</button>
       </div>
     </div>
    </div>

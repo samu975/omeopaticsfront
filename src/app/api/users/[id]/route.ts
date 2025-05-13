@@ -31,7 +31,7 @@ export async function GET(
       );
     }
 
-    const { id: userId } = params;
+    const { id: userId } = await Promise.resolve(params);
 
     if (!userId) {
       return NextResponse.json(
@@ -89,7 +89,7 @@ export async function PATCH(
       );
     }
 
-    const { id: userId } = params;
+    const { id: userId } = await Promise.resolve(params);
     const updateData = await request.json();
 
     if (!userId) {
@@ -158,7 +158,7 @@ export async function DELETE(
       );
     }
 
-    const { id: userId } = params;
+    const { id: userId } = await Promise.resolve(params);
 
     if (!userId) {
       return NextResponse.json(

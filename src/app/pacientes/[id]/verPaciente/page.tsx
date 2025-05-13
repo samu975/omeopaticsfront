@@ -68,7 +68,7 @@ const page = () => {
     if (data){
       toast.success('Formula eliminada correctamente')
     }
-    fetchFormulas()
+    fetchPatient()
   }
 
   const openConfirmationModal = (formulaId: string) => {

@@ -1,13 +1,21 @@
-interface Option {
-  id: number;
+export interface Question {
+  id?: string;
   text: string;
+  type: 'text' | 'number' | 'boolean' | 'select';
+  options?: string[];
+  required: boolean;
 }
 
-interface Question {
-  id: number;
-  title: string;
-  type: "abierta" | "multiple" | "unica";
-  options?: Array<Option>;
+export interface QuestionSet {
+  id?: string;
+  name: string;
+  questions: Question[];
+  createdAt: Date;
+  followUpConfig?: {
+    enabled: boolean;
+    daysOfWeek: string[];
+    time: string;
+  };
 }
 
 export default Question;
