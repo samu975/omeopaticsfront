@@ -142,16 +142,10 @@ export const formulaService = {
     return response.json();
   },
 
-  async getById(id: string): Promise<Formula> {
-    const response = await fetch(`${API_URL}/formulas/${id}`, {
-      headers: getHeaders(),
-    });
-
-    if (!response.ok) {
-      throw new Error('Error al obtener fórmula');
-    }
-
-    return response.json();
+  getById: async (id: string) => {
+    const res = await fetch(`${API_URL}/formulas/${id}`);
+    if (!res.ok) throw new Error('Error al obtener fórmula');
+    return res.json();
   },
 
   async update(id: string, formulaData: Partial<Formula>): Promise<Formula> {

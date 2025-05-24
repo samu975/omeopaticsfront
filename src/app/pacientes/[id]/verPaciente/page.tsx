@@ -38,38 +38,82 @@ const page = () => {
   }, [id])
 
   const fetchFormulas = useCallback(async () => {
-    // Obtener el usuario para extraer los IDs de las fórmulas asignadas
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${id}`);
-    const data = await response.json();
-    const formulaIds = data.asignedFormulas || [];
+    try {
+      // Obtener el usuario con sus fórmulas
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${id}`);
+      const userData = await response.json();
+      const formulaIds = userData.asignedFormulas || [];
 
-    // Obtener los datos completos de cada fórmula
-    const formulasData = await Promise.all(
-      formulaIds.map(async (formulaId: string) => {
-        try {
-          return await formulaService.getById(formulaId);
-        } catch (e) {
-          return null;
-        }
-      })
-    );
+      // Obtener los datos completos de cada fórmula
+      const formulasData = await Promise.all(
+        formulaIds.map(async (formulaId: string) => {
+          try {
+            const formula = (await formulaService.getById(formulaId) as unknown) as Formula;
+            
+            // Obtener los datos de cada banco de preguntas
+            if (formula.questionBanks) {
+              formula.questionBanks = await Promise.all(
+                formula.questionBanks.map(async (bank) => {
+                  try {
+                    const bankResponse = await fetch(`/api/banco-preguntas/${bank.bankId}`);
+                    const bankData = await bankResponse.json();
+                    return {
+                      ...bank,
+                      name: bankData.name,
+                      questions: bankData.questions
+                    };
+                  } catch (e) {
+                    return bank;
+                  }
+                })
+              );
+            }
+            
+            return formula;
+          } catch (e) {
+            return null;
+          }
+        })
+      );
 
-    setPatient(prevPatient => ({
-      ...prevPatient,
-      asignedFormulas: formulasData.filter(Boolean)
-    }));
-  }, [id, setPatient])
+      setPatient(prevPatient => ({
+        ...prevPatient,
+        asignedFormulas: formulasData.filter(Boolean)
+      }));
+    } catch (error) {
+      console.error('Error fetching formulas:', error);
+    }
+  }, [id]);
 
   const handleDeleteFormula = async (formulaId: string) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/formulas/${formulaId}`, {
-      method: 'DELETE'
-    })
-    const data = await response.json()
-    if (data){
-      toast.success('Formula eliminada correctamente')
+    try {
+      // Eliminar la fórmula
+      const deleteResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/formulas/${formulaId}`, {
+        method: 'DELETE'
+      });
+      
+      if (deleteResponse.ok) {
+        // Actualizar el usuario para remover la fórmula de asignedFormulas
+        const updateUserResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${patient._id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            asignedFormulas: patient.asignedFormulas.map(f => f._id).filter(id => id !== formulaId)
+          })
+        });
+
+        if (updateUserResponse.ok) {
+          toast.success('Fórmula eliminada correctamente');
+          fetchFormulas(); // Actualizar la vista
+        }
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Error al eliminar la fórmula');
     }
-    fetchPatient()
-  }
+  };
 
   const openConfirmationModal = (formulaId: string) => {
     setSelectedFormulaId(formulaId)
@@ -103,57 +147,63 @@ const page = () => {
         <div className="flex flex-col gap-2">
           {patient.asignedFormulas?.map((formula, index) => (
             <div 
-              className="flex flex-col gap-2 container bg-slate-700 p-4 rounded-md px-6" 
+              className="flex flex-col gap-4 container bg-slate-700 p-6 rounded-md" 
               key={`formula-${formula._id}-${index}`}
             >
               {formula && (
                 <>
-                  <h4 className="text-lg font-bold text-center md:text-left">
-                    Formula: <span className='text-primary'>{formula.name}</span>
-                  </h4>
-                  <p className='text-lg text-center md:text-left'>
-                    {formula.description}
-                  </p>
-                  <p className='text-lg text-center md:text-left'>
-                    {formula.dosis}
-                  </p>
-                  {formula.answers?.map((answer, answerIndex) => (
-                    <div 
-                      key={`answer-${answer.id || formula._id}-${answerIndex}`} 
-                      className="flex items-center justify-between bg-base-300 p-3 rounded-lg"
-                    >
-                      <div>
-                        <p className="font-semibold">{answer.question.title}</p>
-                        <p className="text-gray-300">{answer.answer.join(', ')}</p>
-                        {answer.createdAt && (
-                          <p className="text-xs text-gray-400 mt-1">
-                            Contestado el: {new Date(answer.createdAt).toLocaleDateString('es-ES', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </p>
-                        )}
+                  <div className="space-y-2">
+                    <h4 className="text-xl font-bold">
+                      Fórmula: <span className='text-primary'>{formula.name}</span>
+                    </h4>
+                    <p className='text-lg'>
+                      <span className="font-semibold">Descripción:</span>{' '}
+                      <span className="text-gray-300">{formula.description}</span>
+                    </p>
+                    <p className='text-lg'>
+                      <span className="font-semibold">Dosis:</span>{' '}
+                      <span className="text-gray-300">{formula.dosis}</span>
+                    </p>
+                  </div>
+
+                  {formula.questionBanks?.map((bank, bankIndex) => (
+                    <div key={`bank-${bank.bankId}-${bankIndex}`} className="bg-base-300 p-4 rounded-lg space-y-3">
+                      <h5 className="font-semibold text-lg">
+                        Banco de preguntas: <span className="text-primary">{bank.name}</span>
+                      </h5>
+                      <div className="space-y-2">
+                        {bank.questions?.map((question) => (
+                          <div key={question.id} className="flex justify-between items-center p-2 bg-base-200 rounded">
+                            <span className="text-primary font-medium">{question.title}</span>
+                            <span className="text-secondary italic">{question.type}</span>
+                          </div>
+                        ))}
                       </div>
+                      
+                      {bank.followUp && (
+                        <p className="text-sm text-gray-400">
+                          Seguimiento: {bank.followUp.enabled ? 
+                            `Días: ${bank.followUp.daysOfWeek.join(', ')} Hora: ${bank.followUp.time}` : 
+                            bank.followUp.oneTime ? 
+                              `Único: ${bank.followUp.oneTimeDate} ${bank.followUp.oneTimeTime}` : 
+                              'No seguimiento'}
+                        </p>
+                      )}
                     </div>
                   ))}
-                  {formula.answers?.length === 0 && 
-                    <p className='text-center text-red-500'>El usuario no ha respondido el seguimiento</p>
-                  }
-                  <div className='flex justify-center gap-2 mt-6'>
+
+                  <div className='flex justify-center gap-2 mt-4'>
                     <button 
                       className='btn btn-secondary' 
                       onClick={() => router.push(`/pacientes/${id}/editarFormula/${formula._id}`)}
                     >
-                      Editar formula
+                      Editar fórmula
                     </button>
                     <button 
                       className='btn btn-error' 
                       onClick={() => openConfirmationModal(formula._id || '')}
                     >
-                      Eliminar formula
+                      Eliminar fórmula
                     </button>
                   </div>
                 </>

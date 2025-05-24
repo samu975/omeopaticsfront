@@ -9,6 +9,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import useFormulaStore from '@/store/formulaStore'
 import { MdDelete } from 'react-icons/md'
 import NavBar from '@/components/NavBar'
+import { ObjectId } from 'mongodb'
 
 const EditarFormula = () => {
   const params = useParams()
@@ -19,7 +20,10 @@ const EditarFormula = () => {
     name: '',
     description: '',
     dosis: '',
-    questions: []
+    questions: [],
+    user: '',
+    createdAt: new Date(),
+    updatedAt: new Date()
   })
 
   const { updateFormula } = useFormulaStore()
@@ -41,9 +45,10 @@ const EditarFormula = () => {
   const handleAddQuestion = () => {
     const newQuestion: Question = {
       id: (formula.questions?.length || 0) + 1,
-      title: '',
-      type: 'abierta',
-      options: []
+      text: '',
+      type: 'text',
+      options: [],
+      required: false
     }
     setFormula(prev => ({
       ...prev,
@@ -53,7 +58,7 @@ const EditarFormula = () => {
   const handleQuestionChange = (questionId: number, field: keyof Question, value: any) => {
     setFormula(prev => ({
       ...prev,
-      questions: prev.questions.map(q => 
+      questions: prev.questions.map((q: Question) => 
         q.id === questionId ? { ...q, [field]: value } : q
       )
     }))
@@ -62,7 +67,7 @@ const EditarFormula = () => {
   const handleAddOption = (questionId: number) => {
     setFormula(prev => ({
       ...prev,
-      questions: prev.questions.map(q => {
+      questions: prev.questions.map((q: Question) => {
         if (q.id === questionId) {
           const newOption = {
             id: (q.options?.length || 0) + 1,
@@ -81,11 +86,11 @@ const EditarFormula = () => {
   const handleOptionChange = (questionId: number, optionId: number, value: string) => {
     setFormula(prev => ({
       ...prev,
-      questions: prev.questions.map(q => {
+      questions: prev.questions.map((q: Question) => {
         if (q.id === questionId) {
           return {
             ...q,
-            options: q.options?.map(opt => 
+            options: q.options?.map((opt: { id: number; text: string }) => 
               opt.id === optionId ? { ...opt, text: value } : opt
             )
           }
@@ -112,7 +117,7 @@ const EditarFormula = () => {
 
       // Validate each question
       for (const question of formula.questions) {
-        if (!question.title) {
+        if (!question.text) {
           toast.error('Todas las preguntas deben tener un título')
           return
         }
@@ -130,7 +135,7 @@ const EditarFormula = () => {
         },
         body: JSON.stringify({
           ...formula,
-          questions: formula.questions.map(q => ({
+          questions: formula.questions.map((q: Question) => ({
             ...q,
             options: q.options || []
           }))
@@ -157,18 +162,18 @@ const EditarFormula = () => {
   const handleDeleteQuestion = (questionId: number) => {
     setFormula(prev => ({
       ...prev,
-      questions: prev.questions.filter(q => q.id !== questionId)
+      questions: prev.questions.filter((q: Question) => q.id !== questionId)
     }))
   }
 
   const handleDeleteOption = (questionId: number, optionId: number) => {
     setFormula(prev => ({
       ...prev,
-      questions: prev.questions.map(q => {
+      questions: prev.questions.map((q: Question) => {
         if (q.id === questionId) {
           return {
             ...q,
-            options: q.options?.filter(opt => opt.id !== optionId)
+            options: q.options?.filter((opt: { id: number; text: string }) => opt.id !== optionId)
           }
         }
         return q
@@ -221,7 +226,7 @@ const EditarFormula = () => {
           </div>
 
           <div className='space-y-6'>
-            {(formula.questions || []).map((question) => (
+            {(formula.questions || []).map((question: Question) => (
               <div key={question.id} className='card bg-base-100 shadow-xl p-6'>
                 <div className='flex justify-between items-center mb-4'>
                   <h3 className='font-bold text-lg'>Pregunta {question.id}</h3>
@@ -239,8 +244,8 @@ const EditarFormula = () => {
                     type="text"
                     placeholder="Título de la pregunta"
                     className='input input-bordered w-full'
-                    value={question.title}
-                    onChange={(e) => handleQuestionChange(question.id, 'title', e.target.value)}
+                    value={question.text}
+                    onChange={(e) => handleQuestionChange(question.id, 'text', e.target.value)}
                   />
 
                   <select
@@ -255,7 +260,7 @@ const EditarFormula = () => {
 
                   {(question.type === 'multiple' || question.type === 'unica') && (
                     <div className='space-y-4'>
-                      {question.options?.map((option) => (
+                      {question.options?.map((option: { id: number; text: string }) => (
                         <div key={option.id} className="flex gap-2 items-center">
                           <input
                             type="text"

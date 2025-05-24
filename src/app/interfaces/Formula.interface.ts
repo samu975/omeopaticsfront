@@ -24,6 +24,12 @@ export interface Question {
 export interface FormulaQuestionBank {
   bankId: string;
   followUp: FollowUp;
+  name?: string;
+  questions?: Array<{
+    id: number;
+    title: string;
+    type: string;
+  }>;
 }
 
 export interface Formula extends Document {

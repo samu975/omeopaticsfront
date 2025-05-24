@@ -64,7 +64,7 @@ const AnswerFormPage = () => {
   const handleSubmit = async () => {
     if (!formula || !formula.questions) return
 
-    const formattedAnswers = formula.questions.map(question => {
+    const formattedAnswers = formula.questions.map((question: Question) => {
       const answer = answers[question.id];
       let formattedAnswer;
       
@@ -77,11 +77,11 @@ const AnswerFormPage = () => {
       }
 
       return {
-        question: question.title,
+        question: question.text,
         type: question.type,
         answer: formattedAnswer
       };
-    }).filter(answer => answer.answer.length > 0);
+    }).filter((answer: { question: string; type: string; answer: string[] }) => answer.answer.length > 0);
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/formulas/${formulaId}/answer`, {
@@ -163,9 +163,9 @@ const AnswerFormPage = () => {
             <div className='mt-4'>
               <h3 className='text-lg font-semibold mb-4'>Preguntas de Seguimiento:</h3>
               <form className='space-y-6'>
-                {formula.questions.map((question: Question, index) => (
+                {formula.questions.map((question: Question, index: number) => (
                   <div key={index} className='space-y-2 bg-base-200 p-4 rounded-lg'>
-                    <label className='text-gray-600 font-medium'>{question.title}</label>
+                    <label className='text-gray-600 font-medium'>{question.text}</label>
                     {question.type === 'abierta' && (
                       <textarea
                         className='textarea textarea-bordered w-full'
@@ -175,7 +175,7 @@ const AnswerFormPage = () => {
                     )}
                     {question.type === 'multiple' && (
                       <div className='space-y-2'>
-                        {question.options?.map((option, optionIndex) => (
+                        {question.options?.map((option: { id: number; text: string }, optionIndex: number) => (
                           <label key={optionIndex} className='flex items-center space-x-2'>
                             <input
                               type='checkbox'
@@ -197,7 +197,7 @@ const AnswerFormPage = () => {
                     )}
                     {question.type === 'unica' && (
                       <div className='space-y-2'>
-                        {question.options?.map((option, optionIndex) => (
+                        {question.options?.map((option: { id: number; text: string }, optionIndex: number) => (
                           <label key={optionIndex} className='flex items-center space-x-2'>
                             <input
                               type='radio'

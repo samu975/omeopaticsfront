@@ -23,7 +23,7 @@ export async function GET(
     const decoded = verify(token, process.env.JWT_SECRET || 'your-secret-key');
     const { userId, role } = decoded as { userId: string; role: string };
 
-    const { id: formulaId } = await Promise.resolve(params);
+    const formulaId = params.id;
     const { db } = await connectToDatabase();
 
     const formula = await db.collection('formulas').findOne({
@@ -73,7 +73,7 @@ export async function POST(
     const decoded = verify(token, process.env.JWT_SECRET || 'your-secret-key');
     const { userId, role } = decoded as { userId: string; role: string };
 
-    const { id: formulaId } = await Promise.resolve(params);
+    const formulaId = params.id;
     const { db } = await connectToDatabase();
 
     const formula = await db.collection('formulas').findOne({
@@ -100,8 +100,8 @@ export async function POST(
 
     const result = await db.collection('formulas').updateOne(
       { _id: new ObjectId(formulaId) },
-      { 
-        $push: { questionSets: questionSet },
+      {
+        $push: { "questionSets": questionSet } as any,
         $set: { updatedAt: new Date() }
       }
     );
@@ -141,7 +141,7 @@ export async function PUT(
     const decoded = verify(token, process.env.JWT_SECRET || 'your-secret-key');
     const { userId, role } = decoded as { userId: string; role: string };
 
-    const { id: formulaId } = await Promise.resolve(params);
+    const formulaId = params.id;
     const { db } = await connectToDatabase();
 
     const formula = await db.collection('formulas').findOne({
@@ -213,7 +213,7 @@ export async function DELETE(
     const decoded = verify(token, process.env.JWT_SECRET || 'your-secret-key');
     const { userId, role } = decoded as { userId: string; role: string };
 
-    const { id: formulaId } = await Promise.resolve(params);
+    const formulaId = params.id;
     const { db } = await connectToDatabase();
 
     const formula = await db.collection('formulas').findOne({
@@ -240,7 +240,7 @@ export async function DELETE(
     const result = await db.collection('formulas').updateOne(
       { _id: new ObjectId(formulaId) },
       { 
-        $pull: { questionSets: { id: questionSetId } },
+        $pull: { "questionSets": { id: questionSetId } } as any,
         $set: { updatedAt: new Date() }
       }
     );

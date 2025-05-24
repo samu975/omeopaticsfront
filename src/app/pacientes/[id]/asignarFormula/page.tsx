@@ -6,7 +6,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import useFormulaStore from '@/store/formulaStore'
-import Formula, { Question } from '@/app/interfaces/Formula.interface'
+import Formula, { Question as QuestionInterface } from '@/app/interfaces/Formula.interface'
 import { MdDelete } from 'react-icons/md'
 import NavBar from '@/components/NavBar'
 

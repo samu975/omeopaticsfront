@@ -23,7 +23,7 @@ export async function GET(
     const { userId, role } = decoded as { userId: string; role: string };
 
     const { db } = await connectToDatabase();
-    const { id: formulaId } = await Promise.resolve(params);
+    const formulaId = params.id;
     const formula = await db.collection('formulas').findOne({
       _id: new ObjectId(formulaId)
     });
@@ -47,7 +47,7 @@ export async function GET(
   } catch (error) {
     console.error('Error al obtener fórmula:', error);
     return NextResponse.json(
-      { message: 'Error interno del servidor' },
+      { message: 'Error al obtener fórmula' },
       { status: 500 }
     );
   }
@@ -72,7 +72,7 @@ export async function PATCH(
     const { userId, role } = decoded as { userId: string; role: string };
 
     const { db } = await connectToDatabase();
-    const { id: formulaId } = await Promise.resolve(params);
+    const formulaId = params.id;
     const formula = await db.collection('formulas').findOne({
       _id: new ObjectId(formulaId)
     });
@@ -131,7 +131,7 @@ export async function DELETE(
     const { userId, role } = decoded as { userId: string; role: string };
 
     const { db } = await connectToDatabase();
-    const { id: formulaId } = await Promise.resolve(params);
+    const formulaId = params.id;
     const formula = await db.collection('formulas').findOne({
       _id: new ObjectId(formulaId)
     });
@@ -196,7 +196,7 @@ export async function POST(
     const decoded = verify(token, process.env.JWT_SECRET || 'your-secret-key');
     const { userId, role } = decoded as { userId: string; role: string };
 
-    const { id: patientId } = await Promise.resolve(params);
+    const patientId = params.id;
     const { db } = await connectToDatabase();
 
     const formulaData = await request.json();
@@ -216,7 +216,7 @@ export async function POST(
     // Actualizar el usuario para agregar la fórmula a asignedFormulas
     await db.collection('users').updateOne(
       { _id: new ObjectId(patientId) },
-      { $push: { asignedFormulas: result.insertedId } }
+      { $push: { "asignedFormulas": result.insertedId.toString() } as any }
     );
 
     return NextResponse.json(insertedFormula);

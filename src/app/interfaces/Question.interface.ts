@@ -1,8 +1,11 @@
 export interface Question {
-  id?: string;
+  id: number;
   text: string;
-  type: 'text' | 'number' | 'boolean' | 'select';
-  options?: string[];
+  type: 'abierta' | 'multiple' | 'unica' | 'number' | 'boolean' | 'text' | 'select';
+  options?: Array<{
+    id: number;
+    text: string;
+  }>;
   required: boolean;
 }
 
