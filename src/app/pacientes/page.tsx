@@ -57,7 +57,7 @@ const page = () => {
 
   const showPacientes = () => {
     return (
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto p-4 min-h-screen">
         <div className="flex justify-between items-center mb-6">
           <Link href="/pacientes/crear" className="btn btn-primary">
             Crear Paciente

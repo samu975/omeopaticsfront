@@ -25,6 +25,24 @@ const DAYS_OF_WEEK = [
   'Domingo'
 ]
 
+interface Question {
+  id: number;
+  title: string;
+  type: string;
+  options: Array<{
+    id: number;
+    text: string;
+  }>;
+}
+
+interface Bank {
+  _id: string;
+  name: string;
+  questions: Question[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 const page = () => {
   const params = useParams()
   const router = useRouter()
@@ -46,7 +64,7 @@ const page = () => {
   })
   
   const [questionBanks, setQuestionBanks] = useState<any[]>([])
-  const [allBanks, setAllBanks] = useState<any[]>([])
+  const [allBanks, setAllBanks] = useState<Bank[]>([])
   const [showBankModal, setShowBankModal] = useState(false)
   const [selectedBankId, setSelectedBankId] = useState('')
   const [bankFollowUp, setBankFollowUp] = useState({
@@ -154,7 +172,7 @@ const page = () => {
   };
 
   return (
-    <div className='bg-base-200 gap-8 py-20 w-full'>
+    <div className='bg-base-200 gap-8 py-20 w-full min-h-screen'>
       <NavBar />
       <div className='container mx-auto max-w-3xl'>
         <h1 className='text-2xl font-bold px-8 mb-8 sm:text-3xl md:text-4xl lg:text-5xl'>
@@ -199,12 +217,26 @@ const page = () => {
               {questionBanks.map((bank, idx) => {
                 const bankData = allBanks.find(b => b._id === bank.bankId);
                 return (
-                  <div key={bank.bankId + idx} className='card bg-base-200 p-3 flex flex-row justify-between items-center'>
-                    <div>
-                      <span className='font-semibold'>{bankData?.name || 'Banco eliminado'}</span>
-                      <span className='ml-2 text-xs'>Seguimiento: {bank.followUp.enabled ? `Días: ${bank.followUp.daysOfWeek.join(', ')} Hora: ${bank.followUp.time}` : bank.followUp.oneTime ? `Único: ${bank.followUp.oneTimeDate} ${bank.followUp.oneTimeTime}` : 'No seguimiento'}</span>
+                  <div key={bank.bankId + idx} className='card bg-base-200 p-4 space-y-4'>
+                    <div className='flex justify-between items-center'>
+                      <div>
+                        <span className='font-semibold'>{bankData?.name || 'Banco eliminado'}</span>
+                        <span className='ml-2 text-xs'>Seguimiento: {bank.followUp.enabled ? `Días: ${bank.followUp.daysOfWeek.join(', ')} Hora: ${bank.followUp.time}` : bank.followUp.oneTime ? `Único: ${bank.followUp.oneTimeDate} ${bank.followUp.oneTimeTime}` : 'No seguimiento'}</span>
+                      </div>
+                      <button type='button' className='btn btn-error btn-xs' onClick={() => handleDeleteBank(idx)}><MdDelete /></button>
                     </div>
-                    <button type='button' className='btn btn-error btn-xs' onClick={() => handleDeleteBank(idx)}><MdDelete /></button>
+                    
+                    <div className="bg-base-100 rounded-lg p-3">
+                      <h4 className="text-sm font-semibold mb-2">Preguntas del banco:</h4>
+                      <div className="space-y-1">
+                        {bankData?.questions.map((question) => (
+                          <div key={question.id} className="flex justify-between items-center p-2 bg-base-200 rounded">
+                            <span className="text-primary font-medium">{question.title}</span>
+                            <span className="text-secondary italic">{question.type}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 );
               })}
@@ -239,6 +271,20 @@ const page = () => {
                   <option key={bank._id} value={bank._id}>{bank.name}</option>
                 ))}
               </select>
+              
+              {selectedBankId && (
+                <div className="mt-4 bg-base-200 rounded-lg p-4">
+                  <h4 className="text-lg font-semibold mb-2">Preguntas del banco:</h4>
+                  <div className="space-y-2">
+                    {allBanks.find(bank => bank._id === selectedBankId)?.questions.map((question) => (
+                      <div key={question.id} className="flex justify-between items-center p-2 bg-base-100 rounded">
+                        <span className="text-primary font-medium">{question.title}</span>
+                        <span className="text-secondary italic">{question.type}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
             <div className='divider'></div>
             <h3 className='text-lg font-semibold mb-2'>Configuración de seguimiento</h3>
