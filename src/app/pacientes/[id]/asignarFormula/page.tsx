@@ -7,9 +7,9 @@ import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import useFormulaStore from '@/store/formulaStore'
 import Formula, { Question } from '@/app/interfaces/Formula.interface'
-import { MdAdd, MdDelete } from 'react-icons/md'
+import { MdDelete } from 'react-icons/md'
 import NavBar from '@/components/NavBar'
-import ModalAcceptDelete from '@/components/ModalAcceptDelete'
+
 
 type Patient = Omit<User, 'id' | 'token'> & {
   _id: string
@@ -44,23 +44,7 @@ const page = () => {
       oneTimeTime: '12:00'
     }
   })
-  const [questions, setQuestions] = useState<Question[]>([])
-  const [showQuestionForm, setShowQuestionForm] = useState(false)
-  const [currentQuestion, setCurrentQuestion] = useState<Question>({
-    id: 0,
-    title: '',
-    type: 'abierta',
-    options: [],
-    followUp: {
-      enabled: false,
-      daysOfWeek: [],
-      time: '12:00',
-      oneTime: false,
-      oneTimeDate: '',
-      oneTimeTime: '12:00',
-      noSend: false
-    }
-  })
+  
   const [questionBanks, setQuestionBanks] = useState<any[]>([])
   const [allBanks, setAllBanks] = useState<any[]>([])
   const [showBankModal, setShowBankModal] = useState(false)

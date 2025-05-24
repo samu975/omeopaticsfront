@@ -1,5 +1,4 @@
 import { Document } from 'mongodb'
-import Answer from './Answer.interface';
 
 export interface FollowUp {
   enabled: boolean;
