@@ -1,16 +1,17 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { verify } from 'jsonwebtoken';
 import { cookies } from 'next/headers';
 import { ObjectId } from 'mongodb';
 
 export async function GET(
-  request: Request,
-  { params }: { params: { userId: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
+    const { userId } = await params;
 
     if (!token) {
       return NextResponse.json(
@@ -25,14 +26,13 @@ export async function GET(
     const { db } = await connectToDatabase();
 
     // Solo admin puede ver fórmulas de otros usuarios
-    if (role !== 'admin' && tokenUserId !== params.userId) {
+      if (role !== 'admin' && tokenUserId !== userId) {
       return NextResponse.json(
         { message: 'No autorizado' },
         { status: 403 }
       );
     }
 
-    const userId = await Promise.resolve(params.userId);
     const formulas = await db.collection('formulas')
       .find({ userId: new ObjectId(userId) })
       .toArray();

@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { verify } from 'jsonwebtoken';
 import { cookies } from 'next/headers';
@@ -6,8 +6,8 @@ import { ObjectId } from 'mongodb';
 import { hash } from 'bcryptjs';
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const cookieStore = await cookies();
@@ -31,9 +31,9 @@ export async function GET(
       );
     }
 
-    const { id: userId } = await Promise.resolve(params);
+    const { id } = await params;
 
-    if (!userId) {
+    if (!id) {
       return NextResponse.json(
         { message: 'ID de usuario no proporcionado' },
         { status: 400 }
@@ -42,8 +42,8 @@ export async function GET(
 
     const { db } = await connectToDatabase();
     const user = await db.collection('users').findOne(
-      { _id: new ObjectId(userId) },
-      { projection: { password: 0 } }
+      { _id: new ObjectId(id) },
+      { projection: { password: 0 } } 
     );
 
     if (!user) {
@@ -64,8 +64,8 @@ export async function GET(
 }
 
 export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const cookieStore = await cookies();
@@ -89,10 +89,10 @@ export async function PATCH(
       );
     }
 
-    const { id: userId } = await Promise.resolve(params);
+    const { id } = await params;
     const updateData = await request.json();
 
-    if (!userId) {
+    if (!id) {
       return NextResponse.json(
         { message: 'ID de usuario no proporcionado' },
         { status: 400 }
@@ -110,7 +110,7 @@ export async function PATCH(
     updateData.updatedAt = new Date();
 
     const result = await db.collection('users').findOneAndUpdate(
-      { _id: new ObjectId(userId) },
+      { _id: new ObjectId(id) },
       { $set: updateData },
       { returnDocument: 'after', projection: { password: 0 } }
     );
@@ -133,8 +133,8 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const cookieStore = await cookies();
@@ -158,9 +158,9 @@ export async function DELETE(
       );
     }
 
-    const { id: userId } = await Promise.resolve(params);
+    const { id } = await params;
 
-    if (!userId) {
+    if (!id) {
       return NextResponse.json(
         { message: 'ID de usuario no proporcionado' },
         { status: 400 }
@@ -169,7 +169,7 @@ export async function DELETE(
 
     const { db } = await connectToDatabase();
     const result = await db.collection('users').deleteOne({
-      _id: new ObjectId(userId)
+      _id: new ObjectId(id)
     });
 
     if (result.deletedCount === 0) {

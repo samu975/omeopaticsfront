@@ -1,12 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
 export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const { db } = await connectToDatabase();
     const { answers } = await request.json();
     
@@ -21,7 +22,7 @@ export async function POST(
     const user = JSON.parse(userHeader);
 
     const formula = await db.collection('formulas').findOne({
-      _id: new ObjectId(params.id),
+      _id: new ObjectId(id),
     });
 
     if (!formula) {
@@ -44,7 +45,7 @@ export async function POST(
     }
 
     const updatedFormula = await db.collection('formulas').findOneAndUpdate(
-      { _id: new ObjectId(params.id) },
+      { _id: new ObjectId(id) },
       {
         $set: { 
           updatedAt: new Date(),

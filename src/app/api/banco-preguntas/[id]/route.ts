@@ -1,28 +1,40 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
+type Props = {
+  params: {
+    id: string;
+  };
+};
+
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    const id = params.id;
+    const { id } = await params;
     const { db } = await connectToDatabase();
     const bank = await db.collection('questionBanks').findOne({ _id: new ObjectId(id) });
-    if (!bank) return NextResponse.json({ message: 'Banco no encontrado' }, { status: 404 });
+    
+    if (!bank) {
+      return NextResponse.json({ message: 'Banco no encontrado' }, { status: 404 });
+    }
+
     return NextResponse.json(bank);
   } catch (error) {
-    return NextResponse.json({ message: 'Error al obtener banco de preguntas' }, { status: 500 });
+    return NextResponse.json(
+      { message: 'Error al obtener banco de preguntas' }, 
+      { status: 500 });
   }
 }
 
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    const id = params.id;
+    const { id } = await params;
     console.log('PUT banco-preguntas, id recibido:', id);
     const { db } = await connectToDatabase();
     const data = await request.json();
@@ -51,11 +63,11 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    const id = params.id;
+    const { id } = await params;
     const { db } = await connectToDatabase();
     const result = await db.collection('questionBanks').deleteOne({ _id: new ObjectId(id) });
     if (!result || result.deletedCount === 0) return NextResponse.json({ message: 'Banco no encontrado' }, { status: 404 });

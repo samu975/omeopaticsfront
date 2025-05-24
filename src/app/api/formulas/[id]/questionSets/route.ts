@@ -4,10 +4,11 @@ import { verify } from 'jsonwebtoken';
 import { cookies } from 'next/headers';
 import { ObjectId } from 'mongodb';
 import { QuestionSet } from '@/app/interfaces/Question.interface';
+import { NextRequest } from 'next/server';
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const cookieStore = await cookies();
@@ -23,11 +24,11 @@ export async function GET(
     const decoded = verify(token, process.env.JWT_SECRET || 'your-secret-key');
     const { userId, role } = decoded as { userId: string; role: string };
 
-    const formulaId = params.id;
+    const { id } = await params;
     const { db } = await connectToDatabase();
 
     const formula = await db.collection('formulas').findOne({
-      _id: new ObjectId(formulaId)
+      _id: new ObjectId(id)
     });
 
     if (!formula) {
@@ -56,8 +57,8 @@ export async function GET(
 }
 
 export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const cookieStore = await cookies();
@@ -73,11 +74,11 @@ export async function POST(
     const decoded = verify(token, process.env.JWT_SECRET || 'your-secret-key');
     const { userId, role } = decoded as { userId: string; role: string };
 
-    const formulaId = params.id;
+    const { id } = await params;
     const { db } = await connectToDatabase();
 
     const formula = await db.collection('formulas').findOne({
-      _id: new ObjectId(formulaId)
+      _id: new ObjectId(id)
     });
 
     if (!formula) {
@@ -99,7 +100,7 @@ export async function POST(
     questionSet.createdAt = new Date();
 
     const result = await db.collection('formulas').updateOne(
-      { _id: new ObjectId(formulaId) },
+      { _id: new ObjectId(id) },
       {
         $push: { "questionSets": questionSet } as any,
         $set: { updatedAt: new Date() }
@@ -124,8 +125,8 @@ export async function POST(
 }
 
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const cookieStore = await cookies();
@@ -141,11 +142,11 @@ export async function PUT(
     const decoded = verify(token, process.env.JWT_SECRET || 'your-secret-key');
     const { userId, role } = decoded as { userId: string; role: string };
 
-    const formulaId = params.id;
+    const { id } = await params;
     const { db } = await connectToDatabase();
 
     const formula = await db.collection('formulas').findOne({
-      _id: new ObjectId(formulaId)
+      _id: new ObjectId(id)
     });
 
     if (!formula) {
@@ -167,7 +168,7 @@ export async function PUT(
 
     const result = await db.collection('formulas').updateOne(
       { 
-        _id: new ObjectId(formulaId),
+        _id: new ObjectId(id),
         'questionSets.id': questionSetId
       },
       { 
@@ -196,8 +197,8 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const cookieStore = await cookies();
@@ -213,11 +214,11 @@ export async function DELETE(
     const decoded = verify(token, process.env.JWT_SECRET || 'your-secret-key');
     const { userId, role } = decoded as { userId: string; role: string };
 
-    const formulaId = params.id;
+    const { id } = await params;
     const { db } = await connectToDatabase();
 
     const formula = await db.collection('formulas').findOne({
-      _id: new ObjectId(formulaId)
+      _id: new ObjectId(id)
     });
 
     if (!formula) {
@@ -238,7 +239,7 @@ export async function DELETE(
     const { questionSetId } = await request.json();
 
     const result = await db.collection('formulas').updateOne(
-      { _id: new ObjectId(formulaId) },
+      { _id: new ObjectId(id) },
       { 
         $pull: { "questionSets": { id: questionSetId } } as any,
         $set: { updatedAt: new Date() }
